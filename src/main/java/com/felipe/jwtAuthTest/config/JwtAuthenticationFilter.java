@@ -74,11 +74,18 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
                     .collect(Collectors.toList())
             )
             .withClaim("id", userDetails.getId())
-            .withExpiresAt(Instant.now().plusMillis(AuthConstants.EXPIRATION_TIME))
+            .withExpiresAt(Instant.now().plusMillis(AuthConstants.ACCESS_TOKEN_EXPIRATION_TIME))
+            .sign(Algorithm.HMAC512(AuthConstants.SECRET));
+
+        String refreshToken = JWT
+            .create()
+            .withSubject(userDetails.getUsername())
+            .withExpiresAt(Instant.now().plusMillis(AuthConstants.REFRESH_TOKEN_EXPIRATION_TIME))
             .sign(Algorithm.HMAC512(AuthConstants.SECRET));
 
         Map<String, String> jsonRes = new HashMap<>();
         jsonRes.put("accessToken", accessToken);
+        jsonRes.put("refreshToken", refreshToken);
 
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);
         response.getWriter().write(new ObjectMapper().writeValueAsString(jsonRes));
