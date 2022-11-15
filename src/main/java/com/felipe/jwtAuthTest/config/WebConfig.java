@@ -29,10 +29,11 @@ public class WebConfig {
 
         http.authorizeRequests()
             .antMatchers("/login").permitAll()
-            .antMatchers("/public").permitAll()
+            .antMatchers("/public/**").permitAll()
             .anyRequest().authenticated();
 
         http.addFilter(new JwtAuthenticationFilter(authProvider()));
+        http.addFilterBefore(new JwtAuthorizationFilter(authProvider()), JwtAuthenticationFilter.class);
 
         return http.build();
     }
